@@ -7,16 +7,22 @@
 
  
 <style>
+    body{
+        background-image: url('background.png');
+        background-repeat:no-repeat;
+    }
    #mycursor {
     position: fixed;
     display : none;
     width : 40px;
     height : 40px;
-    background-color : blue;
+    background-image:url('crosshair.png');
+
 }
  
 #mycursor.pushed {
-    background-color: red;
+    background-color : blue;
+
 }
 </style>
  
@@ -38,11 +44,12 @@ function clamp(x, min, max) {
     return x;
 }
 
-
 var hand = zig.EngageFirstUserInSession();
  
 hand.addEventListener('sessionstart', function(focusPosition) {
     console.log("started");
+    addPull();
+    addPush();
     ce.style.display = 'block';
 });
 
@@ -64,20 +71,62 @@ hand.addEventListener('sessionupdate', function(position) {
 
 // PushDetector
 var pushDetector = zig.controls.PushDetector();
-pushDetector.addEventListener('push', function(pd) {
-    console.log('PushDetector: Push');
-    ce.classList.add('pushed');
-    var click=sound.cloneNode();
-    click.play();
-});
-pushDetector.addEventListener('release', function(pd) {
-    console.log('PushDetector: Release');
-    ce.classList.remove('pushed');
-});
-pushDetector.addEventListener('click', function(pd) {
-    console.log('PushDetector: Click');
-});
+
+function addPush(){
+    pushDetector.addEventListener('push', function(pd) {
+
+        console.log('PushDetector: Push');
+        ce.classList.add('pushed');
+        var click=sound.cloneNode();
+        click.play();
+    });
+    pushDetector.addEventListener('release', function(pd) {
+        console.log('PushDetector: Release');
+        ce.classList.remove('pushed');
+    });
+    pushDetector.addEventListener('click', function(pd) {
+        console.log('PushDetector: Click');
+    });
+}
+
+function removePush(){
+    console.log("remove push");
+    pushDetector.removeEventListener('push');
+    pushDetector.removeEventListener('release');
+    pushDetector.removeEventListener('click');
+}
+
 zig.singleUserSession.addListener(pushDetector);
+
+//PullDetector
+var pullDetector = zig.controls.PullDetector();
+
+function addPull(){
+    console.log("add pull");
+    pullDetector.addEventListener('pull', function(pd) {
+        console.log('PullDetector: Pull');
+        ce.classList.add('pulled');
+        var click=sound.cloneNode();
+        click.play();
+    });
+    pullDetector.addEventListener('release', function(pd) {
+        console.log('PullDetector: Release');
+        ce.classList.remove('pulled');
+    });
+    pullDetector.addEventListener('click', function(pd) {
+        console.log('PullDetector: Click');
+    });
+}
+
+function removePull(){
+    console.log("remove pull");
+    pullDetector.removeEventListener('pull');
+    pullDetector.removeEventListener('release');
+    pullDetector.removeEventListener('click');
+}
+
+
+zig.singleUserSession.addListener(pullDetector);
 
 zig.addListener(hand);
 

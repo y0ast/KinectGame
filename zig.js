@@ -743,6 +743,97 @@ function PushDetector(size) {
 	return api;
 }
 
+//PullDetector
+
+function PullDetector(size) {
+	size = size || 160;
+
+	var api = {
+		// property: isPulled
+		// pull state, true when pulled. *read only*
+		isPulled : false,
+		// property: pullProgress
+		// Normalized pull progress, useful for pull visualization on a cursor
+		pullProgress : 0,
+		// property: pullTime
+		// Timestamp of last pull
+		pullTime : 0,
+		// property: pullPosition
+		// position of last pull event
+		pullPosition : [0,0,0],
+		// property: driftAmount
+		// How fast should the pull detector drift after the hand point
+		driftAmount : 15,
+		// method: release
+		// force a release. should be called after the pull event, and before the 
+		// release event. 
+		release : release,
+		fader : undefined,
+		onsessionstart: onsessionstart,
+		onsessionupdate: onsessionupdate,
+		onsessionend : onsessionend,
+	}
+	var events = Events();
+	events.eventify(api);
+
+	var fader = Fader(Orientation.Z, size);
+	// fader.flip = true; // Don't flip for pulling
+	fader.initialValue = 0.2;
+	fader.autoMoveToContain = true;
+	api.fader = fader;
+
+	fader.driftAmount = api.driftSpeed; // mm/s
+	
+	function onsessionstart(focusPosition) {
+		fader.onsessionstart(focusPosition);
+	}
+
+	function onsessionupdate(position) {
+		fader.moveToContain(position);
+		fader.onsessionupdate(position);
+		api.pullProgress = fader.value;
+		
+		if (!api.isPulled) {
+			if (1.0 == api.pullProgress) {
+				api.isPulled = true;
+				api.pullTime = (new Date()).getTime();
+				api.pullPosition = position;
+				fader.driftAmount = 0; // stop drifting when pulled
+				events.fireEvent('pull', api);
+			}
+		} else {
+			if (api.pullProgress < 0.5) {
+				release();
+			}
+		}
+	}
+
+	function release() {
+		if (!api.isPulled) return;
+		api.isPulled = false;
+		fader.driftAmount = api.driftAmount;
+		events.fireEvent('release', api);
+		if (isClick()) {
+			events.fireEvent('click', api);
+		}		
+	}
+	
+	function onsessionend() {
+		fader.onsessionend();
+		if (api.isPulled) {
+			api.isPulled = false;
+			events.fireEvent('release', api);
+		}
+	}
+
+	function isClick() {
+		var delta = (new Date()).getTime() - api.pullTime;
+		return (delta < 1000);
+	} 
+
+	return api;
+}
+
 //-----------------------------------------------------------------------------
 // class: SwipeDetector
 // Detects swipes
@@ -1407,6 +1498,7 @@ zig = (function() {
 		Fader2D : Fader2D,
 		Fader3D : Fader3D,
 		PushDetector : PushDetector,
+		PullDetector : PullDetector,
 		SwipeDetector : SwipeDetector,
 		WaveDetector : WaveDetector,
 		Cursor : Cursor,
