@@ -1,0 +1,28 @@
+body{
+    background-image: url('background.png');
+    background-repeat:no-repeat;
+}
+#mycursor {
+    position: fixed;
+    display : none;
+    width : 40px;
+    height : 40px;
+    background-image:url('crosshair.png');
+}
+ 
+#mycursor.pushed {
+    background-color : blue;
+
+}
+
+table{
+    width: 1260px;
+    height:  700px;
+}
+
+td{
+    border: 1px solid black;
+}
+img {
+    vertical-align: middle;
+}
