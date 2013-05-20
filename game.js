@@ -3,6 +3,8 @@ var animal = 0;
 var timestart = 0;
 var timeend = 0;
 
+var delay = 500;
+
 $(function (){
     for(var i = 0; i<gridSizey; i++){
         $("#grid").append('<tr id="' + i + '">');        
@@ -22,9 +24,17 @@ $(function (){
     var ce = document.createElement('div');
     ce.id = 'mycursor';
     document.body.appendChild(ce);
+
+    console.log("Browser plugin installed: " + zig.pluginInstalled);
+    console.log("Browser plugin version: " + zig.pluginVersion);
+    console.log("Zig.js version: " + zig.version);
+    console.log("Sensor connected: " + zig.sensorConnected);
+    
 });
 
-
+zig.addEventListener('statuschange', function() {
+        console.log("Sensor connected: " + zig.sensorConnected);
+    });
 
 function createID(x,y){
     id = "#" + x + "-" + y;
@@ -36,35 +46,38 @@ function setAnimal(){
         alert("done!");
         return false;
     }
-    //append an image to the right place in the grid
+    //put an image in the right place in the grid
     x = level[animal][0];
     y = level[animal][1];
     id = createID(x,y);
     console.log(id);
-    $(id).append('<img src="furry' + animal + '.png"></img>');
+    $(id).append('<img class="' + level[animal][2] + '" src="furry' + animal + '.png"></img>');
     $("img").css("margin-left",(700/gridSizey - 50)/2);
 
     timestart = new Date().getTime() / 1000; 
 
-    $(id).click(function (){
-        $(this).off('click');
-        $(this).html("");
-        timeend = new Date().getTime() / 1000;
-        //score();
-        animal += 1;
-        setAnimal();
+    $(id).click(function (direction){
+        if ($(this).children("img").hasClass(direction)) {
+            $(this).off('click');
+            $(this).html("");
+            timeend = new Date().getTime() / 1000;
+            //score();
+            animal += 1;
+            setAnimal();
+        }
+        else {
+            //play error sound
+            //Give visual feedback by pulling or pushing the animal
+        }
     });
 }
 
-function fireClick(){
+function fireClick(direction){
     x = ce.css("left");
     y = ce.css("top");
     console.log([x,y]);
-    $(document.elementFromPoint(x, y)).click();  
+    $(document.elementFromPoint(x, y)).click(direction);  
 }
-
-
-
 
 function clamp(x, min, max) {
     if (x < min) return min;
@@ -101,14 +114,17 @@ hand.addEventListener('sessionupdate', function(position) {
 var pushDetector = zig.controls.PushDetector();
 
 function addPush(){
-    pushDetector.addEventListener('push', function(pd) {
+    console.log("add push");
+    pushDetector.addEventListener('push',
+                                  function(pd) {
+                                    setTimeout(addPull, delay);
+                                    removePull();
+                                    console.log('PushDetector: Push');
+                                    ce.classList.add('pushed');
+                                    var click=sound.cloneNode();
+                                    click.play();
+                                  });
 
-        console.log('PushDetector: Push');
-        ce.classList.add('pushed');
-        var click=sound.cloneNode();
-        click.play();
-        fireClick();
-    });
     pushDetector.addEventListener('release', function(pd) {
         console.log('PushDetector: Release');
         ce.classList.remove('pushed');
@@ -130,15 +146,20 @@ zig.singleUserSession.addListener(pushDetector);
 //PullDetector
 var pullDetector = zig.controls.PullDetector();
 
+
+//Add the pull event listeners
 function addPull(){
     console.log("add pull");
-    pullDetector.addEventListener('pull', function(pd) {
-        console.log('PullDetector: Pull');
-        ce.classList.add('pulled');
-        var click=sound.cloneNode();
-        click.play();
-        fireClick();
-    });
+    pullDetector.addEventListener('pull',
+                                  function(pd) {
+                                    setTimeout(addPush, delay);;
+                                    removePush();
+                                    console.log('PullDetector: Pull');
+                                    ce.classList.add('pulled');
+                                    var click=sound.cloneNode();
+                                    click.play();
+                                  });
+    
     pullDetector.addEventListener('release', function(pd) {
         console.log('PullDetector: Release');
         ce.classList.remove('pulled');
@@ -148,6 +169,8 @@ function addPull(){
     });
 }
 
+
+//Remove the pull event listeners
 function removePull(){
     console.log("remove pull");
     pullDetector.removeEventListener('pull');
@@ -159,6 +182,3 @@ function removePull(){
 zig.singleUserSession.addListener(pullDetector);
 
 zig.addListener(hand);
-
-
-
