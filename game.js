@@ -1,9 +1,24 @@
 var animal = 0;
 
-var timestart = 0;
-var timeend = 0;
-
 var delay = 500;
+
+var clickedinarea = false;
+
+console.log("Browser plugin installed: " + zig.pluginInstalled);
+console.log("Zig.js version: " + zig.version);
+console.log("Sensor connected: " + zig.sensorConnected);
+
+var ce = document.createElement('div');
+ce.id = 'mycursor';
+
+var succes = new Audio("sound/PUNCH.wav");
+succes.preload = 'auto';
+succes.load();
+
+var wrong = new Audio("sound/wrong.mp3");
+wrong.preload = 'auto';
+wrong.load();
+
 
 $(function (){
     for(var i = 0; i<gridSizey; i++){
@@ -17,19 +32,14 @@ $(function (){
     $("td").css("width",1200/gridSizex);
     $("td").css("height",700/gridSizey);
 
-    var sound = new Audio("PUNCH.wav");
-    sound.preload = 'auto';
-    sound.load();
-
-    var ce = document.createElement('div');
-    ce.id = 'mycursor';
     document.body.appendChild(ce);
 
-    console.log("Browser plugin installed: " + zig.pluginInstalled);
-    console.log("Browser plugin version: " + zig.pluginVersion);
-    console.log("Zig.js version: " + zig.version);
-    console.log("Sensor connected: " + zig.sensorConnected);
-    
+    setTimeout(function(){setAnimal()},3000);
+
+    console.log(window.innerWidth);
+
+    //mean code to get out the nasty logo
+    // setTimeout(function(){$("img[alt='Powered by Zigfu']").first().hide()},500);
 });
 
 zig.addEventListener('statuschange', function() {
@@ -50,33 +60,53 @@ function setAnimal(){
     x = level[animal][0];
     y = level[animal][1];
     id = createID(x,y);
-    console.log(id);
-    $(id).append('<img class="' + level[animal][2] + '" src="furry' + animal + '.png"></img>');
+
+    $(id).append('<img class="' + level[animal][2] + '" src="img/furry' + animal + '.png"></img>');
     $("img").css("margin-left",(700/gridSizey - 50)/2);
 
-    timestart = new Date().getTime() / 1000; 
-
     $(id).click(function (direction){
+        clickedinarea = true;
+        console.log("clickinggg");
+        console.log(direction);
+
         if ($(this).children("img").hasClass(direction)) {
             $(this).off('click');
-            $(this).html("");
-            timeend = new Date().getTime() / 1000;
-            //score();
+
+            //Very ugly code
+            if($this.children("img").hasClass("push")){
+                $this.children("img").addClass("fade");
+            } else {
+                $this.children("img").addClass("grow");
+            }
+
+            var click=succes.cloneNode();
+            click.play();
+
+            setTimeout($(this).html(""),850);
+            
             animal += 1;
             setAnimal();
         }
         else {
-            //play error sound
-            //Give visual feedback by pulling or pushing the animal
+            var click=wrong.cloneNode();
+            click.play();
         }
     });
 }
 
 function fireClick(direction){
-    x = ce.css("left");
-    y = ce.css("top");
+    clickedinarea = false;
+    console.log(window.innerWidth);
+    x = window.innerWidth - parseFloat($(ce).css("left").slice(0,-2)) + "px" ;
+    y = $(ce).css("top");
     console.log([x,y]);
-    $(document.elementFromPoint(x, y)).click(direction);  
+    $(document.elementFromPoint(x, y)).click(direction);
+    setTimeout(function(){
+        if(clickedinarea == false){
+            var click=wrong.cloneNode();
+            click.play();
+        }
+    },500);
 }
 
 function clamp(x, min, max) {
@@ -108,10 +138,14 @@ hand.addEventListener('sessionupdate', function(position) {
 
     ce.style.left = (val[0] * window.innerWidth - (ce.offsetWidth / 2)) + "px";
     ce.style.top = ((1- val[1]) * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+
+    // console.log(val);
 });
 
-// PushDetector
+// PushDetector and Pull detector
 var pushDetector = zig.controls.PushDetector();
+
+var pullDetector = zig.controls.PullDetector();
 
 function addPush(){
     console.log("add push");
@@ -119,10 +153,9 @@ function addPush(){
                                   function(pd) {
                                     setTimeout(addPull, delay);
                                     removePull();
+                                    fireClick("push");
                                     console.log('PushDetector: Push');
                                     ce.classList.add('pushed');
-                                    var click=sound.cloneNode();
-                                    click.play();
                                   });
 
     pushDetector.addEventListener('release', function(pd) {
@@ -134,18 +167,13 @@ function addPush(){
     });
 }
 
+//Remove push eventlisteners
 function removePush(){
     console.log("remove push");
     pushDetector.removeEventListener('push');
     pushDetector.removeEventListener('release');
     pushDetector.removeEventListener('click');
 }
-
-zig.singleUserSession.addListener(pushDetector);
-
-//PullDetector
-var pullDetector = zig.controls.PullDetector();
-
 
 //Add the pull event listeners
 function addPull(){
@@ -154,10 +182,9 @@ function addPull(){
                                   function(pd) {
                                     setTimeout(addPush, delay);;
                                     removePush();
+                                    fireClick("pull");
                                     console.log('PullDetector: Pull');
                                     ce.classList.add('pulled');
-                                    var click=sound.cloneNode();
-                                    click.play();
                                   });
     
     pullDetector.addEventListener('release', function(pd) {
@@ -169,7 +196,6 @@ function addPull(){
     });
 }
 
-
 //Remove the pull event listeners
 function removePull(){
     console.log("remove pull");
@@ -178,7 +204,9 @@ function removePull(){
     pullDetector.removeEventListener('click');
 }
 
-
+//Init push/pull event listeners
+zig.singleUserSession.addListener(pushDetector);
 zig.singleUserSession.addListener(pullDetector);
 
+//Init the hand
 zig.addListener(hand);
