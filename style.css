@@ -15,13 +15,9 @@ body{
 
 }
 
-table{
-    width: 1260px;
-    height:  700px;
-}
 
-td{
-    border: 1px solid black;
+#animal{
+    position: fixed;
 }
 
 .grow{
@@ -41,7 +37,7 @@ td{
 transition:all .3s ease;*/
 
 img {
-    vertical-align: middle;
+    border: 0px;
     -webkit-transition:all .8s ease;
     -moz-transition:all .8s ease;
     transition:all .8s ease;

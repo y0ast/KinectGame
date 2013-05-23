@@ -8,15 +8,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <table id="grid">
-    </table>
-
     <script>
-        var level = 1;
-        var gridSizex = 2;
-        var gridSizey = 2;
+        //Start from 1
+        var world = 1;
+        //Difficulty is in pixels and describes radius of the circle around the middle point of the image
+        var difficulty = 100;
 
-        var level = [[1,1,"push"],[0,0,"pull"]];
+        //The size of the images in pixels of one side
+        var imageSizex = 50;
+        var imageSizey = 40;
+
+
+        // x-pixel,y-pixel (relative to right top),"pushl"/"pull"
+        var level = [[100,100,"push"],[500,500,"pull"]];
     </script>
 </body>
 </html>

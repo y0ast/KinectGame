@@ -1,15 +1,24 @@
+//Fix message for when level is finished
+//Fix animation for new animal, now it's too fast
+
 var animal = 0;
 
 var delay = 500;
-
-var clickedinarea = false;
 
 console.log("Browser plugin installed: " + zig.pluginInstalled);
 console.log("Zig.js version: " + zig.version);
 console.log("Sensor connected: " + zig.sensorConnected);
 
+zig.addEventListener('statuschange', function() {
+        console.log("Sensor connected: " + zig.sensorConnected);
+    });
+
 var ce = document.createElement('div');
 ce.id = 'mycursor';
+
+var img = document.createElement('img');
+img.id = 'animal';
+
 
 var succes = new Audio("sound/PUNCH.wav");
 succes.preload = 'auto';
@@ -21,92 +30,59 @@ wrong.load();
 
 
 $(function (){
-    for(var i = 0; i<gridSizey; i++){
-        $("#grid").append('<tr id="' + i + '">');        
-        for(var j=0;  j<gridSizex; j++){
-           $("#" + i).append('<td id="' + i + '-' + j + '"></td>'); 
-        }
-        $(".grid").append('</tr>');        
-    }
-
-    $("td").css("width",1200/gridSizex);
-    $("td").css("height",700/gridSizey);
-
     document.body.appendChild(ce);
-
-    setTimeout(function(){setAnimal()},3000);
-
-    console.log(window.innerWidth);
-
-    //mean code to get out the nasty logo
+    document.body.appendChild(img);
+    setTimeout(newAnimal(),1000);
+    // Code to delete logo from the interface, breaks the game after one minute
     // setTimeout(function(){$("img[alt='Powered by Zigfu']").first().hide()},500);
 });
 
-zig.addEventListener('statuschange', function() {
-        console.log("Sensor connected: " + zig.sensorConnected);
-    });
 
-function createID(x,y){
-    id = "#" + x + "-" + y;
-    return id;
+
+function newAnimal(){
+    $("#animal").removeClass();
+
+    img.style.left = level[animal][0]+ "px";
+    img.style.top = level[animal][1] + "px";
+
+    img.style.width = imageSizex + "px";
+    img.style.height = imageSizey + "px";
+
+    $("#animal").attr("src", "img/furry" + world + "-" + animal + ".png");
+    $("#animal").addClass(level[animal][2]);
 }
 
-function setAnimal(){
-    if(animal == level.length){
-        alert("done!");
-        return false;
+function fireMotion(direction){
+    //Get position of the cursor and correct for its size
+    cursorleft = parseFloat(ce.style.left) - 25;
+    cursortop = parseFloat(ce.style.top) - 25;
+
+    //Get position of the image and correct for its size
+    imageleft = parseFloat(img.style.left) - (imageSizex/2); 
+    imagetop = parseFloat(img.style.top) - (imageSizey/2);
+
+    distance = Math.sqrt(Math.pow(Math.abs(imageleft-cursorleft),2) + Math.pow(Math.abs(imagetop-cursortop),2));
+
+    console.log("distance: " + distance);
+
+    //Hit
+    if(distance < difficulty && $("#animal").hasClass(direction)){
+        console.log("succes")
+        var click=succes.cloneNode();
+        click.play();
+        animal += 1;
+
+        if($("#animal").hasClass("push")){
+            $("#animal").addClass("fade");
+        } else {
+            $("#animal").addClass("grow");
+        }
+        setTimeout(newAnimal(),3000);
+    } 
+    else {
+        var click=wrong.cloneNode();
+        click.play();
     }
-    //put an image in the right place in the grid
-    x = level[animal][0];
-    y = level[animal][1];
-    id = createID(x,y);
-
-    $(id).append('<img class="' + level[animal][2] + '" src="img/furry' + animal + '.png"></img>');
-    $("img").css("margin-left",(700/gridSizey - 50)/2);
-
-    $(id).click(function (direction){
-        clickedinarea = true;
-        console.log("clickinggg");
-        console.log(direction);
-
-        if ($(this).children("img").hasClass(direction)) {
-            $(this).off('click');
-
-            //Very ugly code
-            if($this.children("img").hasClass("push")){
-                $this.children("img").addClass("fade");
-            } else {
-                $this.children("img").addClass("grow");
-            }
-
-            var click=succes.cloneNode();
-            click.play();
-
-            setTimeout($(this).html(""),850);
-            
-            animal += 1;
-            setAnimal();
-        }
-        else {
-            var click=wrong.cloneNode();
-            click.play();
-        }
-    });
-}
-
-function fireClick(direction){
-    clickedinarea = false;
-    console.log(window.innerWidth);
-    x = window.innerWidth - parseFloat($(ce).css("left").slice(0,-2)) + "px" ;
-    y = $(ce).css("top");
-    console.log([x,y]);
-    $(document.elementFromPoint(x, y)).click(direction);
-    setTimeout(function(){
-        if(clickedinarea == false){
-            var click=wrong.cloneNode();
-            click.play();
-        }
-    },500);
 }
 
 function clamp(x, min, max) {
@@ -139,7 +115,6 @@ hand.addEventListener('sessionupdate', function(position) {
     ce.style.left = (val[0] * window.innerWidth - (ce.offsetWidth / 2)) + "px";
     ce.style.top = ((1- val[1]) * window.innerHeight - (ce.offsetHeight / 2)) + "px";
 
-    // console.log(val);
 });
 
 // PushDetector and Pull detector
@@ -153,26 +128,15 @@ function addPush(){
                                   function(pd) {
                                     setTimeout(addPull, delay);
                                     removePull();
-                                    fireClick("push");
+                                    fireMotion("push");
                                     console.log('PushDetector: Push');
-                                    ce.classList.add('pushed');
                                   });
-
-    pushDetector.addEventListener('release', function(pd) {
-        console.log('PushDetector: Release');
-        ce.classList.remove('pushed');
-    });
-    pushDetector.addEventListener('click', function(pd) {
-        console.log('PushDetector: Click');
-    });
 }
 
 //Remove push eventlisteners
 function removePush(){
     console.log("remove push");
     pushDetector.removeEventListener('push');
-    pushDetector.removeEventListener('release');
-    pushDetector.removeEventListener('click');
 }
 
 //Add the pull event listeners
@@ -182,26 +146,17 @@ function addPull(){
                                   function(pd) {
                                     setTimeout(addPush, delay);;
                                     removePush();
-                                    fireClick("pull");
+                                    fireMotion("pull");
                                     console.log('PullDetector: Pull');
                                     ce.classList.add('pulled');
                                   });
-    
-    pullDetector.addEventListener('release', function(pd) {
-        console.log('PullDetector: Release');
-        ce.classList.remove('pulled');
-    });
-    pullDetector.addEventListener('click', function(pd) {
-        console.log('PullDetector: Click');
-    });
+
 }
 
 //Remove the pull event listeners
 function removePull(){
     console.log("remove pull");
     pullDetector.removeEventListener('pull');
-    pullDetector.removeEventListener('release');
-    pullDetector.removeEventListener('click');
 }
 
 //Init push/pull event listeners
