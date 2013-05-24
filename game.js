@@ -1,4 +1,3 @@
-//Fix message for when level is finished
 //Fix animation for new animal, now it's too fast
 
 var animal = 0;
@@ -40,6 +39,12 @@ $(function (){
 
 
 function newAnimal(){
+    //Check if we are done
+
+    if(level.length == animal){
+        window.location.href = "level" + world + "finished.html";
+    }
+
     $("#animal").removeClass();
 
     img.style.left = level[animal][0]+ "px";
@@ -77,7 +82,7 @@ function fireMotion(direction){
         } else {
             $("#animal").addClass("grow");
         }
-        setTimeout(newAnimal(),3000);
+        setTimeout(function(){newAnimal()},1000);
     } 
     else {
         var click=wrong.cloneNode();

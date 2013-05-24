@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<head>
+    <title>Games and Learning</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="zig.js"></script>
+    <script src="game.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script>
+        //Start from 1 (world is a bad name, I actually mean level but that's already used, P. Karlton acknowledged it's hard to name things)
+        var world = 2;
+        //Difficulty is in pixels and describes radius of the circle around the middle point of the image
+        var difficulty = 100;
+
+        //The size of the images in pixels of one side
+        var imageSizex = 50;
+        var imageSizey = 40;
+
+
+        // x-pixel,y-pixel (relative to right top),"push"/"pull"
+        var level = [[100,100,"push"],[500,500,"pull"]];
+    </script>
+</body>
+</html>
