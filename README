@@ -4,5 +4,4 @@ Currently in Beta.
 
 There is one known obscure bug, where the furry animal disappears but a new one does not show up, has something to do with the setAnimal or newAnimal function. Will be fixed sometime in the future, the course is now finished so it doesn't have priority.
 
-
 Artwork done by Jorrit Salden.
