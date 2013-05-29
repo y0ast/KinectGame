@@ -6,6 +6,12 @@
     <script src="game.js"></script>
 
     <link rel="stylesheet" href="style.css">
+    <style>
+        body{
+            background-image: url('img/background2.png');
+            background-repeat:no-repeat;
+        }
+    </style>
 </head>
 <body>
     <script>
@@ -16,11 +22,11 @@
 
         //The size of the images in pixels of one side
         var imageSizex = 50;
-        var imageSizey = 40;
+        var imageSizey = 50;
 
 
-        // x-pixel,y-pixel (relative to right top),"push"/"pull"
-        var level = [[100,100,"push"],[500,500,"pull"]];
+        // x-pixel,y-pixel (relative to right top),"pushl"/"pull"
+        var level = [[100,100,"push"],[500,500,"push"],[300,500,"pull"],[500,100,"pull"],[250,250,"push"],[200,500,"pull"],[500,200,"push"],[400,200,"push"],[100,100,"pull"],[400,200,"pull"],[400,400,"push"],[450,200,"push"]];
     </script>
 </body>
 </html>

@@ -6,7 +6,6 @@ var delay = 500;
 
 console.log("Browser plugin installed: " + zig.pluginInstalled);
 console.log("Zig.js version: " + zig.version);
-console.log("Sensor connected: " + zig.sensorConnected);
 
 zig.addEventListener('statuschange', function() {
         console.log("Sensor connected: " + zig.sensorConnected);
@@ -47,14 +46,18 @@ function newAnimal(){
 
     $("#animal").removeClass();
 
+    img.style.visibility = "hidden";
+
     img.style.left = level[animal][0]+ "px";
     img.style.top = level[animal][1] + "px";
 
     img.style.width = imageSizex + "px";
     img.style.height = imageSizey + "px";
 
-    $("#animal").attr("src", "img/furry" + world + "-" + animal + ".png");
+    $("#animal").attr("src", "img/" + world + "-" + animal + ".png");
     $("#animal").addClass(level[animal][2]);
+
+    img.style.visibility = "visible";
 }
 
 function fireMotion(direction){
@@ -82,7 +85,7 @@ function fireMotion(direction){
         } else {
             $("#animal").addClass("grow");
         }
-        setTimeout(function(){newAnimal()},1000);
+        setTimeout(function(){newAnimal()},1500);
     } 
     else {
         var click=wrong.cloneNode();

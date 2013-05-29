@@ -1,7 +1,4 @@
-body{
-    background-image: url('img/background.png');
-    background-repeat:no-repeat;
-}
+
 #mycursor {
     position: fixed;
     display : none;
@@ -21,9 +18,9 @@ body{
 }
 
 .grow{
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    transform: scale(1);
+    -webkit-transform: scale(3);
+    -moz-transform: scale(3);
+    transform: scale(3);
 }
 
 .fade{

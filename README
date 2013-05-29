@@ -1,18 +1,8 @@
 Project for Games and Learning course - AUC 2013
 
-TO DO:
+Currently in Beta.
 
-Fire click events on pull / push of the Kinect (code contains test version)
-Update Score depending on time
-Animation/sound when hitting the fuzzy creature
+There is one known obscure bug, where the furry animal disappears but a new one does not show up, has something to do with the setAnimal or newAnimal function. Will be fixed sometime in the future, the course is now finished so it doesn't have priority.
 
 
-Refactoring:
-Make the table width and height dependent on screen size (for projectors etc)
-
-
-To Decide:
-
-How to manage pull/push in one movement.
-    - if we only allow push then no feedback on pull
-    - if we allow both then need to distinguish better (Breanndan's code?)
+Artwork done by Jorrit Salden.
